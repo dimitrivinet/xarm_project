@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from alphabet import letters_v3
+from vocal_control.alphabet import letters_v3
 from copy import deepcopy
 from xarm.wrapper import XArmAPI
 
@@ -10,6 +10,7 @@ import threading
 import time
 import unicodedata
 import os
+# import arm_init
 
 finished = True
 default_pos = [151.378, -644.823]
@@ -25,6 +26,12 @@ letter_functions = {"a": letters_v3.A, "b": letters_v3.B, "c": letters_v3.C, "d"
                     "u": letters_v3.U, "v": letters_v3.V, "w": letters_v3.W, "x": letters_v3.X, "y": letters_v3.Y,
                     "z": letters_v3.Z, " ": letters_v3.space, "Invalid": letters_v3.Invalid}
 
+
+def sigint_handler(sig, frame):
+    print("\nSIGINT Captured, terminating")
+    arm.set_state(state=4)
+    arm.disconnect()
+    sys.exit(0)
 
 
 def get_current_pos(default_pos: list()) -> list(): 
@@ -54,6 +61,7 @@ def get_current_pos(default_pos: list()) -> list():
 
     return current_pos
 
+
 def goto_current_pos(arm, current_pos):
     ret = arm.set_servo_angle(angle=[23.6, -59.9, -21.0, 0.0, 80.9, 0.0], speed = 25, mvacc = 500, wait = True)
     if ret < 0:
@@ -71,6 +79,41 @@ def goto_current_pos(arm, current_pos):
         return -1
 
     return 0
+    
+
+def start() -> XArmAPI:
+    global arm
+
+    current_pos = get_current_pos(default_pos)
+
+    connected = False
+    while not connected:
+        try:
+            arm = XArmAPI('172.21.72.250', do_not_open=True)
+            arm.connect()
+            connected = True
+        except:
+            print("arm is not online. trying again in 3 seconds...")
+            time.sleep(3)
+
+    arm.set_world_offset([0, 0, 0, 180, 0.6, -150.8])
+    time.sleep(0.5)
+
+    print(arm.position)
+    time.sleep(1)
+
+    arm.motion_enable(enable=True)
+    arm.set_mode(0)
+    arm.set_state(state=0)
+
+    goto_current_pos(arm, current_pos)
+    print("arm at starting pos")
+    time.sleep(1)
+
+    threading.Thread(target=letters_v3.move, args=(arm,), daemon=True).start()
+
+    return arm
+
 
 def exit(arm):
     print("exiting...")
@@ -88,41 +131,19 @@ def exit(arm):
     arm.disconnect()
     sys.exit(0)
 
-def sigint_handler(sig, frame):
-    print("\nSIGINT Captured, terminating")
-    arm.set_state(state=4)
-    arm.disconnect()
-    sys.exit(0)
 
-def write(arm, to_write):
-
-    """ 
-        #check if word will go out of page
-        pos = deepcopy(arm.position)
-        curr_y = pos[2]
-        if curr_y + len(to_write)*10 > R_THRESH:
-            to_next_line = pos
-            to_next_line[0] -= 15
-            to_next_line[1] = L_THRESH
-            ret = arm.set_position(*to_next_line , radius=-1, is_radian=False, wait=True, speed=20, mvacc=200, relative=False)
-            if ret < 0:
-                print('set_position, ret={}'.format(ret))
-                return -1
-            time.sleep(1)
-    """
+def write(to_write: str) -> bool:
+    global arm
+    if arm == "dummy":  # check if arm has been initialized
+        arm = start()
 
     paths = list()
-    # letters_v3.start(arm)
     for letter in to_write:
-        # print(letter)
         paths.append(letter_functions.get(letter, letters_v3.Invalid)(arm))
 
     arm.set_pause_time(1, False)
 
-    # print(paths)
-
     for path in paths:
-        # print(path)
         for pos in path:
             letters_v3.command_queue.put(pos)
             print(pos)
@@ -132,61 +153,6 @@ def write(arm, to_write):
     arm.set_position(0, 0, 0, 0, 0, 0, 0, is_radian=False, wait=True, speed=5, mvacc=500, relative=True)
 
     return True
-    # print(paths)
-
-
-
-
-def start():
-    arm = "dummy"
-    current_pos = get_current_pos(default_pos)
-
-    signal.signal(signal.SIGINT, sigint_handler)
-
-    connected = False
-    while not connected:
-        try:
-            arm = XArmAPI('172.21.72.250', do_not_open=True)
-            arm.connect()
-            connected = True
-        except:
-            print("arm is not online. trying again in 3 seconds...")
-            time.sleep(3)
-
-
-    # arm.set_world_offset([0, 0, 0, 0, 0, 0])
-    arm.set_world_offset([0, 0, 0, 180, 0.6, -150.8])
-    time.sleep(0.5)
-
-    print(arm.position)
-    time.sleep(1)
-
-    arm.motion_enable(enable=True)
-    arm.set_mode(0)
-    arm.set_state(state=0)
-
-    # input()
-
-    goto_current_pos(arm, current_pos)
-    print("arm at starting pos")
-    time.sleep(1)
-    # input()
-
-    # base_pos = deepcopy(arm.position)
-    # print("base_pos: {}".format(base_pos))
-    # print("world offset: {}".format(arm.world_offset))
-    # arm.set_world_offset([0, 0, 0, -179.7, base_pos[4], base_pos[5]])
-    # time.sleep(0.5)
-    # print("world offset: {}".format(arm.world_offset))
-
-    # arm.motion_enable(enable=True)
-    # arm.set_mode(0)
-    # arm.set_state(state=0)
-
-    # print(arm.position)
-    # arm.set_tool_position(z=-5, wait=True, speed=10, mvacc=100)
-
-    threading.Thread(target=letters_v3.move, args=(arm,), daemon=True).start()
 
 
 def send_sentence(to_write):
@@ -200,7 +166,9 @@ def send_sentence(to_write):
     
     finished = False
     finished = write(arm, to_write)
-
-def exit():
-    exit(arm)
                 
+
+
+signal.signal(signal.SIGINT, sigint_handler)
+
+arm = start()

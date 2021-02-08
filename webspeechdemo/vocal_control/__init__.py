@@ -1,1 +1,1 @@
-import vocal_control
+from . import *
