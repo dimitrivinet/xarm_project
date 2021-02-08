@@ -106,7 +106,8 @@ def start() -> XArmAPI:
     arm.set_mode(0)
     arm.set_state(state=0)
 
-    goto_current_pos(arm, current_pos)
+    # goto_current_pos(arm, current_pos)
+
     print("arm at starting pos")
     time.sleep(1)
 
@@ -171,4 +172,4 @@ def send_sentence(to_write):
 
 signal.signal(signal.SIGINT, sigint_handler)
 
-arm = start()
+# arm = start()
