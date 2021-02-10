@@ -6,7 +6,6 @@ from xarm.wrapper import XArmAPI
 from icecream import ic
 # ic.enable()
 ic.disable()
-# from arm_init import start
 
 import vocal_control.writing as writing
 
@@ -27,10 +26,11 @@ def execute(arm: XArmAPI, command: str) -> int:
         # ic(sentence)
         sentence = sentence.split("ecri")
         # ic(sentence)
-        sentence = sentence[1][2:]
+        sentence = sentence[1][2:] + " "
         print(f"to write: {sentence}")
         if current_mode != "writing":
             writing.write_setup(arm)
+        current_mode = "writing"
         writing.write(arm, sentence)
     except IndexError:
         print("mot clé non trouvé")
