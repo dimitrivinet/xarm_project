@@ -4,12 +4,15 @@ import os
 import sys
 import time
 import unicodedata
+import threading
+import signal
 
 from copy import deepcopy
 from xarm.wrapper import XArmAPI
 
-from alphabet import letters_v3
-from arm_init import start
+from vocal_control.alphabet import letters_v3
+from vocal_control.arm_init import start
+
 
 letter_functions = {"a": letters_v3.A, "b": letters_v3.B, "c": letters_v3.C, "d": letters_v3.D, "e": letters_v3.E,
                     "f": letters_v3.F, "g": letters_v3.G, "h": letters_v3.H, "i": letters_v3.I, "j": letters_v3.J,
@@ -37,7 +40,7 @@ def write(arm: XArmAPI, to_write: str) -> bool:
     for path in paths:
         for pos in path:
             letters_v3.command_queue.put(pos)
-            print(pos)
+            # print(pos)
 
     letters_v3.command_queue.join()
 
@@ -46,12 +49,7 @@ def write(arm: XArmAPI, to_write: str) -> bool:
     return 0
 
 
-def send_sentence(arm: XArmAPI, to_write: str) -> int:
-    sentence = to_write
-
-    sentence = ''.join((c for c in unicodedata.normalize(
-        'NFD', sentence[1][2:]) if unicodedata.category(c) != 'Mn'))
-    sentence = sentence.lower()
+def send_sentence(arm: XArmAPI, sentence: str) -> int:
 
     to_write = list(sentence)
     print("writing: {}".format(sentence))
@@ -92,7 +90,7 @@ def get_current_pos(default_pos: list()) -> list():
     return current_pos
 
 
-def goto_current_pos(arm, current_pos):
+def goto_current_pos(arm: XArmAPI, current_pos: list):
     ret = arm.set_servo_angle(angle=[23.6, -59.9, -21.0, 0.0, 80.9, 0.0], speed = 25, mvacc = 500, wait = True)
     if ret < 0:
         print('set_servo_angle, ret={}'.format(ret))
@@ -107,6 +105,33 @@ def goto_current_pos(arm, current_pos):
     if ret < 0:
         print('set_position, ret={}'.format(ret))
         return -1
+
+    return 0
+
+
+def write_setup(arm: XArmAPI) -> int:
+    yaw = deepcopy(arm.position)[5]
+    # arm.set_world_offset([0, 0, 0, 180, 0.6, yaw])
+    arm.set_world_offset([0, 0, 0, 180, 0.6, 90])
+    time.sleep(1)
+
+    arm.motion_enable(enable=True)
+    arm.set_mode(0)
+    arm.set_state(state=0)
+
+    current_pos = deepcopy(arm.position)
+    ret = arm.set_position(current_pos[0], current_pos[1], -168, 0, 0, 0 , radius=-1, is_radian=False, wait=True, speed=20, mvacc=200, relative=False)
+    if ret < 0:
+        print('set_position, ret={}'.format(ret))
+        return -1
+
+    # goto_current_pos(arm, current_pos)
+
+    print("arm at starting pos")
+    print(arm.position)
+    time.sleep(1)
+
+    threading.Thread(target=letters_v3.move, args=(arm,), daemon=True).start()
 
     return 0
 
@@ -131,6 +156,7 @@ def exit(arm):
 
 if __name__ == "__main__":
     arm = start()
+    write_setup(arm)
 
     to_write = input("to write: \n")
     send_sentence(arm, to_write)
