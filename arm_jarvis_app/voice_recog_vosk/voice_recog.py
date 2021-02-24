@@ -21,14 +21,17 @@ def recog(filename):
     # model = Model("model")
     # rec = KaldiRecognizer(model, wf.getframerate())
 
+    temp_result = ""
+
     while True:
         data = wf.readframes(4000)
         if len(data) == 0:
             break
         if rec.AcceptWaveform(data):
-            dicti = json.loads(rec.Result())
-            # print(dicti["text"])
+            temp_result = json.loads(rec.Result())["text"]
+            # print(temp_result)
 
     final_result = json.loads(rec.Result())["text"]
 
-    print(f"reconnu: {final_result}")
+    # print(f"reconnu: {final_result}")
+    return final_result if final_result != "" else temp_result

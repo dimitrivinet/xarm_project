@@ -8,10 +8,10 @@ sys.path.append(dirname)
 
 from voice_recog_vosk.voice_recog import recog 
 
-print(dirname)
+# print(dirname)
 
-from flask import Flask, render_template
-from flask_socketio import SocketIO
+from flask import Flask, render_template, url_for
+from flask_socketio import SocketIO, emit
 
 
 app = Flask(__name__)
@@ -81,11 +81,12 @@ def handle_stream(data):
         f.writeframes(genHeader() + data)
     
     print(f"file file_{numfile}.wav written")
-    recog(f"file_{numfile}.wav")
+    stt = recog(f"file_{numfile}.wav")
+    print(f"reconnu: {stt}")
 
     numfile += 1
 
-
+    emit('audio_stream_response', stt)
 
 
 @app.route('/')
@@ -95,5 +96,4 @@ def page():
 
 if __name__ == '__main__':
     print('server launched.')
-    print(dirname)
     socketio.run(app, host=HTTP_SERVER_HOST, port = HTTP_SERVER_PORT)

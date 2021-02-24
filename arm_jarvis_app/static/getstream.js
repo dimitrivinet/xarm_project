@@ -18,6 +18,10 @@ socket.on('connect', () => {
   socket.send("connected to server")
 });
 
+socket.on('audio_stream_response', stt => {
+  console.log(stt);
+  document.getElementById("message").innerHTML = stt;
+});
 
 const media_constraints = {
   video: false,
