@@ -1,5 +1,7 @@
 # Custom-added
 *.tmp
+project2021.code-workspace
+arm_jarvis_app/voice_recog_vosk/model/
 
 
 # Byte-compiled / optimized / DLL files
