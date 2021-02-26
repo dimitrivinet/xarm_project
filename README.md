@@ -8,3 +8,7 @@ Demo for web speech recognition. Needs Flask and icecream (install via pip) and 
 ```bash
   git clone https://github.com/xArm-Developer/xArm-Python-SDK.git && cd xArm-Python-SDK && python3 setup.py install
   ```
+
+# arm_jarvis_app
+
+Web app for speech recognition, to be merged with arm control.
