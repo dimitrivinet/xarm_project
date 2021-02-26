@@ -78,6 +78,11 @@
     border: 0;
     background-color:transparent;
     padding: 0;
+  }
+  #exit_button {
+    border: 0;
+    background-color:transparent;
+    padding: 0;
   } 
 </style>
 <h1 class="center" id="headline">
@@ -104,6 +109,8 @@
 <div class="right">
   <button id="start_button" onclick="startButton(event)">
     <img id="start_img" src="mic.gif" alt="Start"></button>
+  <button id="exit_button" onclick="exitButton(event)">
+    <img id="start_img" src="mic.gif" alt="Exit"></button>
 </div>
 <div id="results">
   <span id="final_span" class="final"></span>
@@ -201,9 +208,9 @@ var langs =
 for (var i = 0; i < langs.length; i++) {
   select_language.options[i] = new Option(langs[i][0], i);
 }
-select_language.selectedIndex = 6;
+select_language.selectedIndex = 9;
 updateCountry();
-select_dialect.selectedIndex = 6;
+select_dialect.selectedIndex = 0;
 showInfo('info_start');
 
 function updateCountry() {
@@ -219,6 +226,7 @@ function updateCountry() {
 
 var create_email = false;
 var final_transcript = '';
+var interim_transcript = '';
 var recognizing = false;
 var ignore_onend;
 var start_timestamp;
@@ -281,7 +289,7 @@ if (!('webkitSpeechRecognition' in window)) {
   };
 
   recognition.onresult = function(event) {
-    var interim_transcript = '';
+    interim_transcript = '';
     for (var i = event.resultIndex; i < event.results.length; ++i) {
       if (event.results[i].isFinal) {
         final_transcript += event.results[i][0].transcript;
@@ -348,7 +356,7 @@ function emailButton() {
 }
 
 function post_data(text_to_post) {
-  let data = {"text": "abc"};
+  let data = {"text": text_to_post};
 
   fetch("/", {
     method: "POST", 
@@ -361,10 +369,14 @@ function post_data(text_to_post) {
 function startButton(event) {
   if (recognizing) {
     recognition.stop();
+    if (final_transcript == '') {
+      post_data(interim_transcript);
+    }
+    else {
+      post_data(final_transcript);
+    }
     return;
   }
-
-  post_data("abc");
 
   final_transcript = '';
   recognition.lang = select_dialect.value;
@@ -376,6 +388,18 @@ function startButton(event) {
   showInfo('info_allow');
   showButtons('none');
   start_timestamp = event.timeStamp;
+}
+
+function exitButton(event) {
+  console.log("exit");
+  let data = {"exit": "0"};
+
+  fetch("/exit", {
+    method: "POST", 
+    body: JSON.stringify(data)
+  }).then(res => {
+    console.log("Request complete! response:", res);
+  });
 }
 
 function showInfo(s) {

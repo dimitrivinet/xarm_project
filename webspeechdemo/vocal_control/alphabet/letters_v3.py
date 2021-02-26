@@ -28,6 +28,7 @@ def space(arm):
 def move(arm):
     # start(arm)
     last_pos = deepcopy(arm.position) + [0, 0]
+    # last_pos[2] 
     while True:
         time.sleep(0.05)
         if not command_queue.empty():
@@ -36,15 +37,15 @@ def move(arm):
 
             if len(path) == 8:               
 
-                if last_pos[0] + 10 > R_THRESH and abs(path[2]) != 5 :
-                    last_pos[1] = L_THRESH
-                    last_pos[0] -= 15
+                # if last_pos[0] + 10 > R_THRESH and abs(path[2]) != 5 :
+                #     last_pos[1] = L_THRESH
+                #     last_pos[0] -= 15
 
                 last_pos = list(add(last_pos[:6], path[:6])) + [0, 0]
                 last_pos[6] = path[6]
                 last_pos[7] = path[7]
 
-                # print(last_pos)
+                print(last_pos)
 
                 speed = 10 #speed < 250
                 # ret = arm.set_position(*last_pos[:6], radius=last_pos[6], is_radian=False, wait=last_pos[7], speed=speed, mvacc=10*speed, relative=False)
