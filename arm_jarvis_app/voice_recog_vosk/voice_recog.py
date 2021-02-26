@@ -5,6 +5,8 @@ import wave
 import json
 
 dirname = os.path.dirname(__file__)
+if __name__ == "__main__":
+    sys.exit("This is useless on its own :D")
 
 from vosk import SetLogLevel
 from voice_recog_vosk import rec
@@ -12,8 +14,9 @@ from voice_recog_vosk import rec
 
 def recog(filename):
     SetLogLevel(0)
+    filepath = f"{dirname}/../wavs/{filename}"
 
-    wf = wave.open(f"{dirname}/../wavs/{filename}", "rb")
+    wf = wave.open(filepath, "rb")
     if wf.getnchannels() != 1 or wf.getsampwidth() != 2 or wf.getcomptype() != "NONE":
         print ("Audio file must be WAV format mono PCM.")
         exit (1)
@@ -33,8 +36,8 @@ def recog(filename):
 
     final_result = json.loads(rec.Result())["text"]
 
-    if os.path.exists(f"{dirname}/../wavs/{filename}"):
-        os.remove(f"{dirname}/../wavs/{filename}")
+    if os.path.exists(filepath):
+        os.remove(filepath)
 
     # print(f"reconnu: {final_result}")
     return final_result if final_result != "" else temp_result

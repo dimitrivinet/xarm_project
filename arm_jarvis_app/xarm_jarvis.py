@@ -80,9 +80,13 @@ def handle_stream(data):
         f.setcomptype("NONE", "not compressed")
         f.writeframes(genHeader() + data)
     
-    print(f"file file_{numfile}.wav written")
+    print(f"file written")
+    print(f"recognizing...")
     stt = recog(f"file_{numfile}.wav")
-    print(f"reconnu: {stt}")
+    print(f"recognized: {stt}")
+
+    print("_" * 16)
+    print("")
 
     # numfile += 1
 
