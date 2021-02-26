@@ -8,7 +8,7 @@ sys.path.append(dirname)
 
 from voice_recog_vosk.voice_recog import recog 
 
-# print(dirname)
+print(dirname)
 
 from flask import Flask, render_template, url_for
 from flask_socketio import SocketIO, emit

@@ -28,7 +28,7 @@ def recog(filename):
         if len(data) == 0:
             break
         if rec.AcceptWaveform(data):
-            temp_result = json.loads(rec.Result())["text"]
+            temp_result += json.loads(rec.Result())["text"]
             # print(temp_result)
 
     final_result = json.loads(rec.Result())["text"]
