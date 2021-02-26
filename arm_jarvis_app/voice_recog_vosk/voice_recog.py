@@ -33,5 +33,8 @@ def recog(filename):
 
     final_result = json.loads(rec.Result())["text"]
 
+    if os.path.exists(f"{dirname}/../wavs/{filename}"):
+        os.remove(f"{dirname}/../wavs/{filename}")
+
     # print(f"reconnu: {final_result}")
     return final_result if final_result != "" else temp_result

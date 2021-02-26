@@ -84,7 +84,7 @@ def handle_stream(data):
     stt = recog(f"file_{numfile}.wav")
     print(f"reconnu: {stt}")
 
-    numfile += 1
+    # numfile += 1
 
     emit('audio_stream_response', stt)
 
