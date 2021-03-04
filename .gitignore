@@ -1,8 +1,8 @@
 # Custom-added
 *.tmp
 project2021.code-workspace
-**/voice_recog_vosk/model/
-**/wavs/**
+xarm_alfred_app/voice_recog_vosk/model/
+xarm_alfred_app/wavs/
 
 
 # Byte-compiled / optimized / DLL files
