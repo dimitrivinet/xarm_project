@@ -11,17 +11,14 @@ sys.path.append(dirname)
 import writing
 from arm_init import robot_start
 
-_arm = "dummy"
+_arm = None
 
 def sigint_handler(sig, frame):
         print("\nSIGINT Captured, terminating")
-        try:
-            if _arm:
-                _arm.set_state(state=4)
-                _arm.disconnect()
-            sys.exit(0)
-        except AttributeError as e:
-            sys.exit(0)
+        if _arm:
+            _arm.set_state(state=4)
+            _arm.disconnect()
+        sys.exit(0)
 
 signal.signal(signal.SIGINT, sigint_handler)
 
@@ -30,7 +27,7 @@ class Arm():
         self.current_mode = "none"
         self.arm = robot_start()
         global _arm
-        _arm = robot_start
+        _arm = self.arm
 
         print("\nxarm initialized.\n")
 
@@ -40,7 +37,7 @@ class Arm():
         if self.current_mode != "writing":
             writing.write_setup(self.arm)
         self.current_mode = "writing"
-        writing.write(self.arm, to_write)
+        writing.robot_write(self.arm, to_write)
 
 
 

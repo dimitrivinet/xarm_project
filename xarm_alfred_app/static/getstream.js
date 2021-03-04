@@ -14,7 +14,7 @@ var input;
 var AudioContext = window.AudioContext || window.webkitAudioContext;
 var audioContext = new AudioContext;
 
-const socket = io('ws://localhost:8000');
+const socket = io('ws://localhost:8080');
 
 socket.on('connect', () => {
   socket.send("connected to server")

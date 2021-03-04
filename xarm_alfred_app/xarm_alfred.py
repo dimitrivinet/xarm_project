@@ -5,11 +5,13 @@ import sys
 import requests
 import robot_control
 import argparse
+import threading
 
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 
 from voice_recog_vosk.voice_recog import recog 
+
 
 
 dirname = os.path.dirname(__file__)
@@ -30,9 +32,11 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 #cors = CORS(app)
 
-socketio = SocketIO(app)
+socketio = SocketIO(app, logger=False, engineio_logger=False, allow_upgrades=False)
 
-HTTP_SERVER_PORT = 8000
+socketio.init_app(app, cors_allowed_origins="*")
+
+HTTP_SERVER_PORT = 8080
 HTTP_SERVER_HOST = "localhost"
 
 sampleRate = 44100
@@ -121,17 +125,19 @@ def handle_stream(data):
     emit('rasa_response', rasa_response)
 
     to_write = extract_to_write(rasa_response)
-    if arm != "dummy":
+    if arm != "dummy" and to_write != -1:
         arm.write(to_write)
 
 @socketio.on('manual_stream')
 def handle_manual_stream(data):
+    print(data)
+
     rasa_response = send_rasa(data)
 
     emit('rasa_response', rasa_response)
 
     to_write = extract_to_write(rasa_response)
-    if arm != "dummy":
+    if arm != "dummy" and to_write != -1:
         arm.write(to_write)
 
 @app.route('/')
@@ -140,7 +146,10 @@ def page():
 
 
 if __name__ == '__main__':
+
+    print('server launched.\n')
+
     if not args.no_robot:
         arm = robot_control.Arm()
-    print('server launched.\n')
-    socketio.run(app, host=HTTP_SERVER_HOST, port = HTTP_SERVER_PORT)
+
+    socketio.run(app, host=HTTP_SERVER_HOST, port = HTTP_SERVER_PORT,)
