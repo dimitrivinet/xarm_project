@@ -1,17 +1,17 @@
 
 import wave
 import os
-dirname = os.path.dirname(__file__)
-
 import sys
-sys.path.append(dirname)
-
-from voice_recog_vosk.voice_recog import recog 
-
-print(dirname)
+import requests
 
 from flask import Flask, render_template, url_for
 from flask_socketio import SocketIO, emit
+
+from voice_recog_vosk.voice_recog import recog 
+
+dirname = os.path.dirname(__file__)
+# print(dirname)
+sys.path.append(dirname)
 
 
 app = Flask(__name__)
@@ -28,6 +28,25 @@ bitsPerSample = 16
 channels = 1
 
 numfile = 0
+
+
+def extract_to_write(message: str) -> str:
+    try:
+        if message[0:7] == "Entendu":
+            to_write = message[25:-1]
+            print(f"to write: {to_write}")
+            return to_write
+        else:
+            print("pas de mot à écrire dans le message")
+            return -1
+    except:
+        print("pas de mot à écrire dans le message")
+        return -1
+        
+
+def send_rasa(message: str) -> str:
+    r = requests.post("http://localhost:5005/webhooks/rest/webhook", json={"sender": "alfred_user", "message": message})
+    return r.json()[0]["text"]
 
 def genHeader():
     global sampleRate
@@ -85,12 +104,26 @@ def handle_stream(data):
     stt = recog(f"file_{numfile}.wav")
     print(f"recognized: {stt}")
 
+    emit('audio_stream_response', stt)
+
     print("_" * 16)
     print("")
 
     # numfile += 1
 
-    emit('audio_stream_response', stt)
+    rasa_response = send_rasa(stt)
+    # print(rasa_response)
+    emit('rasa_response', rasa_response)
+
+    to_write = extract_to_write(rasa_response)
+
+@socketio.on('manual_stream')
+def handle_manual_stream(data):
+    rasa_response = send_rasa(data)
+
+    to_write = extract_to_write(rasa_response)
+
+    emit('rasa_response', rasa_response)
 
 
 @app.route('/')

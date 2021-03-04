@@ -2,6 +2,8 @@
 
 var recording = false;
 var recordButton = document.getElementById("record");
+var manualMessageButton = document.getElementById("sendManualMessage")
+var clearButton = document.getElementById("clear");
 var soundStream;
 var mediaRecorder;
 var timeslice = 500;
@@ -22,6 +24,11 @@ socket.on('audio_stream_response', stt => {
   console.log(stt);
   document.getElementById("message").innerHTML = stt;
 });
+
+socket.on('rasa_response', rasa_response => {
+  console.log(rasa_response);
+  document.getElementById("rasa").innerHTML = rasa_response;
+})
 
 const media_constraints = {
   video: false,
@@ -122,7 +129,18 @@ function record() {
   recording ? stopRecordFunc() : startRecordFunc();
 }
 
+function sendManualMessage() {
+  message = document.getElementById("manualMessage").value;
+  socket.emit('manual_stream', message);
+}
+
+function clearRasa() {
+  document.getElementById("rasa").innerHTML = "<br />";
+}
+
 recordButton.onclick = record;
+manualMessageButton.onclick = sendManualMessage;
+clearButton.onclick = clearRasa;
 
 console.log("begin");
 
