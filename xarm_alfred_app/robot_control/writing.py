@@ -3,9 +3,7 @@
 import os
 import sys
 import time
-import unicodedata
 import threading
-import signal
 
 from copy import deepcopy
 from xarm.wrapper import XArmAPI
@@ -51,7 +49,7 @@ def send_sentence(arm: XArmAPI, sentence: str, ) -> int:
     to_write = list(sentence)
     print("writing: {}".format(sentence))
     
-    return write(arm, to_write)
+    return robot_write(arm, to_write)
 
 
 def get_last_pos(default_pos: list(), ) -> list(): 
@@ -169,12 +167,3 @@ def robot_exit(arm: XArmAPI, ) -> None:
 
     # arm.disconnect()
     # sys.exit(0)
-
-
-
-if __name__ == "__main__":
-    arm = start()
-    write_setup(arm)
-
-    to_write = input("to write: \n")
-    send_sentence(arm, to_write)
