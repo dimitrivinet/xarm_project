@@ -4,15 +4,26 @@ import os
 import sys
 import requests
 import robot_control
+import argparse
 
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 
 from voice_recog_vosk.voice_recog import recog 
 
+
 dirname = os.path.dirname(__file__)
 # print(dirname)
 sys.path.append(dirname)
+
+
+parser = argparse.ArgumentParser(description='A.L.F.R.E.D., robotic assistant.')
+parser.add_argument('-n', '--no-robot', action='store_true', help="don't connect to the xArm")
+args = parser.parse_args()
+# print(args.no_robot)
+
+
+arm = "dummy"
 
 
 app = Flask(__name__)
@@ -27,8 +38,6 @@ HTTP_SERVER_HOST = "localhost"
 sampleRate = 44100
 bitsPerSample = 16
 channels = 1
-
-numfile = 0
 
 
 def extract_to_write(message: str) -> str:
@@ -86,13 +95,10 @@ def handle_stream(data):
     # print(data)
     # print("end of byte stream")
 
-    # with open("test.wav", mode="wb") as f:
-    #     f.write(genHeader() + data)
     global numfile
     global dirname
-    # print(data)
 
-    with wave.open(f"{dirname}/wavs/file_{numfile}.wav", "wb") as f:
+    with wave.open(f"{dirname}/wavs/file_0.wav", "wb") as f:
         f.setnchannels(1)
         f.setsampwidth(16 // 8)
         f.setframerate(44100)
@@ -102,7 +108,7 @@ def handle_stream(data):
     
     print(f"file written")
     print(f"recognizing...")
-    stt = recog(f"file_{numfile}.wav")
+    stt = recog(f"file_0.wav")
     print(f"recognized: {stt}")
 
     emit('audio_stream_response', stt)
@@ -110,22 +116,23 @@ def handle_stream(data):
     print("_" * 16)
     print("")
 
-    # numfile += 1
-
     rasa_response = send_rasa(stt)
     # print(rasa_response)
     emit('rasa_response', rasa_response)
 
     to_write = extract_to_write(rasa_response)
+    if arm != "dummy":
+        arm.write(to_write)
 
 @socketio.on('manual_stream')
 def handle_manual_stream(data):
     rasa_response = send_rasa(data)
 
-    to_write = extract_to_write(rasa_response)
-
     emit('rasa_response', rasa_response)
 
+    to_write = extract_to_write(rasa_response)
+    if arm != "dummy":
+        arm.write(to_write)
 
 @app.route('/')
 def page():
@@ -133,6 +140,7 @@ def page():
 
 
 if __name__ == '__main__':
-    arm = robot_control.Arm()
-    print('server launched.')
+    if not args.no_robot:
+        arm = robot_control.Arm()
+    print('server launched.\n')
     socketio.run(app, host=HTTP_SERVER_HOST, port = HTTP_SERVER_PORT)

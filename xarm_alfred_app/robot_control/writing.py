@@ -7,12 +7,10 @@ import unicodedata
 import threading
 import signal
 
-from icecream import ic
 from copy import deepcopy
 from xarm.wrapper import XArmAPI
 
-from vocal_control.alphabet import letters_v3
-from vocal_control.arm_init import start
+from robot_control.alphabet import letters_v3
 
 
 letter_functions = {"a": letters_v3.A, "b": letters_v3.B, "c": letters_v3.C, "d": letters_v3.D, "e": letters_v3.E,
@@ -29,10 +27,7 @@ L_THRESH = -611.823
 
 dirname = os.path.dirname(__file__)
 
-def write(arm: XArmAPI, to_write: str, ) -> bool:
-    if arm == "dummy":  # check if arm has been initialized
-        arm = start()
-
+def robot_write(arm: XArmAPI, to_write: str, ) -> bool:
     paths = list()
     for letter in to_write:
         paths.append(letter_functions.get(letter, letters_v3.Invalid)(arm))
@@ -151,7 +146,7 @@ def write_setup(arm: XArmAPI, ) -> int:
     return 0
 
 
-def exit(arm: XArmAPI, ) -> None:
+def robot_exit(arm: XArmAPI, ) -> None:
     
     #get current pos
     # print("exiting...")

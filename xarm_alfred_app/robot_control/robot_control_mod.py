@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 
-from vocal_control.alphabet import letters_v3
+from robot_control.alphabet import letters_v3
 from copy import deepcopy
 from xarm.wrapper import XArmAPI
-from icecream import ic
-# ic.enable()
-ic.disable()
 
-import vocal_control.writing as writing
+import robot_control.writing as writing
 
 import threading
 import time
@@ -23,9 +20,7 @@ def execute(arm: XArmAPI, command: str) -> int:
     global current_mode
     try:
         sentence = sentence_normalize(command)
-        # ic(sentence)
         sentence = sentence.split("ecri")
-        # ic(sentence)
         sentence = sentence[1][2:] + " "
         print(f"to write: {sentence}")
         if current_mode != "writing":
@@ -43,7 +38,6 @@ def sentence_normalize(sentence: str) -> str:
         'NFD', sentence) if unicodedata.category(c) != 'Mn'))
 
     sentence = sentence.lower()
-    ic(sentence)
     return sentence
                 
 
