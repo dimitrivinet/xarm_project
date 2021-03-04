@@ -11,3 +11,5 @@ if not os.path.exists(dirname + "/model"):
 
 model = Model(dirname + "/model")
 rec = KaldiRecognizer(model, 44100)
+
+print("\nvosk initialized.\n")

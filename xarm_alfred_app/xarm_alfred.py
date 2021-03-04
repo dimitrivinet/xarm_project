@@ -3,8 +3,9 @@ import wave
 import os
 import sys
 import requests
+import robot_control
 
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 
 from voice_recog_vosk.voice_recog import recog 
@@ -132,5 +133,6 @@ def page():
 
 
 if __name__ == '__main__':
+    arm = robot_control.Arm()
     print('server launched.')
     socketio.run(app, host=HTTP_SERVER_HOST, port = HTTP_SERVER_PORT)
