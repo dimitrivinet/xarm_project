@@ -1,7 +1,17 @@
-
-import wave
 import os
 import sys
+
+dirname = os.path.dirname(os.path.realpath(__file__))
+
+if dirname == "":
+    print("error: dirname empty")
+    sys.exit(0)
+
+print(dirname)
+sys.path.append(dirname)
+
+
+import wave
 import requests
 import robot_control
 import argparse
@@ -10,17 +20,12 @@ import threading
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 
+
 from voice_recog_vosk.voice_recog import recog 
-
-
-
-dirname = os.path.dirname(__file__)
-# print(dirname)
-sys.path.append(dirname)
-
 
 parser = argparse.ArgumentParser(description='A.L.F.R.E.D., robotic assistant.')
 parser.add_argument('-n', '--no-robot', action='store_true', help="don't connect to the xArm")
+parser.add_argument('-r', '--reset-pos', action='store_true', help="reset the current position to default for writing mode")
 args = parser.parse_args()
 # print(args.no_robot)
 

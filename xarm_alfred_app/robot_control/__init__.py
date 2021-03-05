@@ -4,7 +4,7 @@ import sys
 import signal
 import unicodedata
 
-dirname = os.path.dirname(__file__)
+dirname = os.path.dirname(os.path.realpath(__file__))
 # print(dirname)
 sys.path.append(dirname)
 
@@ -14,10 +14,14 @@ from arm_init import robot_start
 _arm = None
 
 def sigint_handler(sig, frame):
-        print("\nSIGINT Captured, terminating")
+        print("\nSIGINT Captured, terminating")        
         if _arm:
-            _arm.set_state(state=4)
-            _arm.disconnect()
+            _arm.arm.set_state(state=4)
+
+            if _arm.current_mode == "writing":
+                writing.write_exit(_arm.arm)
+
+            _arm.arm.disconnect()
         sys.exit(0)
 
 signal.signal(signal.SIGINT, sigint_handler)
@@ -27,7 +31,7 @@ class Arm():
         self.current_mode = "none"
         self.arm = robot_start()
         global _arm
-        _arm = self.arm
+        _arm = self
 
         print("\nxarm initialized.\n")
 

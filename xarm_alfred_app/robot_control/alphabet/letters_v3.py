@@ -14,6 +14,9 @@ R_THRESH = -439.877
 L_THRESH = -611.823
 
 
+SPEED = 15 # min: 1 max: 20 default: 5
+
+
 def start(arm):
     arm.set_tool_position(z=-5, wait=True, speed=10, mvacc=100)
 
@@ -45,11 +48,10 @@ def move(arm):
                 last_pos[6] = path[6]
                 last_pos[7] = path[7]
 
-                print(last_pos)
+                # print(last_pos)
 
-                speed = 10 #speed < 250
                 # ret = arm.set_position(*last_pos[:6], radius=last_pos[6], is_radian=False, wait=last_pos[7], speed=speed, mvacc=10*speed, relative=False)
-                ret = arm.set_position(*last_pos[:6], radius=last_pos[6], is_radian=False, wait=False, speed=speed, mvacc=10*speed, relative=False)
+                ret = arm.set_position(*last_pos[:6], radius=last_pos[6], is_radian=False, wait=False, speed=SPEED, mvacc=10*SPEED, relative=False)
                 if ret < 0:
                     print('set_position, ret={}'.format(ret))
                     return -1

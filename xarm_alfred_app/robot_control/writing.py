@@ -11,6 +11,10 @@ from xarm.wrapper import XArmAPI
 from robot_control.alphabet import letters_v3
 
 
+dirname = os.path.dirname(os.path.realpath(__file__))
+# print(dirname)
+
+
 letter_functions = {"a": letters_v3.A, "b": letters_v3.B, "c": letters_v3.C, "d": letters_v3.D, "e": letters_v3.E,
                     "f": letters_v3.F, "g": letters_v3.G, "h": letters_v3.H, "i": letters_v3.I, "j": letters_v3.J,
                     "k": letters_v3.K, "l": letters_v3.L, "m": letters_v3.M, "n": letters_v3.N, "o": letters_v3.O,
@@ -23,7 +27,6 @@ current_pos = [0, 0]
 R_THRESH = -439.877
 L_THRESH = -611.823
 
-dirname = os.path.dirname(__file__)
 
 def robot_write(arm: XArmAPI, to_write: str, ) -> bool:
     paths = list()
@@ -90,7 +93,7 @@ def goto_last_pos(arm: XArmAPI, last_pos: list, ):
     current_pos = deepcopy(arm.position)
 
     ret = arm.set_position(current_pos[0], current_pos[1], 500, current_pos[3], current_pos[4], current_pos[5], 
-        radius=-1, is_radian=False, wait=True, speed=speed, mvacc=10*speed, relative=False)
+        radius=-1, is_radian=False, wait=True, speed=speed, mvacc=10*speed, relative=False) 
     if ret < 0:
         print('set_position, ret={}'.format(ret))
         return -1
@@ -107,7 +110,7 @@ def goto_last_pos(arm: XArmAPI, last_pos: list, ):
         print('set_position, ret={}'.format(ret))
         return -1
 
-    ret = arm.set_position(last_pos[0], last_pos[1], 172, current_pos[3], current_pos[4], 90, 
+    ret = arm.set_position(last_pos[0], last_pos[1], 171.8, current_pos[3], current_pos[4], 90, 
         radius=-1, is_radian=False, wait=True, speed=20, mvacc=200, relative=False)
     if ret < 0:
         print('set_position, ret={}'.format(ret))
@@ -132,7 +135,8 @@ def write_setup(arm: XArmAPI, ) -> int:
 
     # current_yaw = deepcopy(arm.position)[5]
     # arm.set_world_offset([0, 0, 0, 180, 0.6, current_yaw])
-    arm.set_world_offset([0, 0, 0, 180, 0.6, 90])
+    # arm.set_world_offset([0, 0, 0, 180, 0.6, 90])
+    arm.set_world_offset([0, 0, 0, -176, 0, 90])
     time.sleep(1)
 
     arm.motion_enable(enable=True)
@@ -144,24 +148,25 @@ def write_setup(arm: XArmAPI, ) -> int:
     return 0
 
 
-def robot_exit(arm: XArmAPI, ) -> None:
+def write_exit(arm: XArmAPI, last_pos: list = None, ) -> None:
     
     #get current pos
     # print("exiting...")
 
-    pos = deepcopy(arm.position)
     time.sleep(0.5)
-    arm.set_state(state=4)
-
     arm.set_world_offset([0, 0, 0, 0, 0, 0])
     time.sleep(1)
 
+    if last_pos is None:
+        last_pos = deepcopy(arm.position)
+
+
     try:
         with open(dirname + "/current_pos.tmp" , "w+") as f:
-            to_save = f"{pos[0]}\n{pos[1] + 15}"
+            to_save = f"{last_pos[0] + 5}\n{last_pos[1]}"
             print(to_save)
             print(f.write(to_save))
-            print("success.")
+            print("wrote last pos to temp file.")
     except Exception as e:
         print(e)
 
