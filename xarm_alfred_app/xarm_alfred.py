@@ -26,6 +26,7 @@ from voice_recog_vosk.voice_recog import recog
 parser = argparse.ArgumentParser(description='A.L.F.R.E.D., robotic assistant.')
 parser.add_argument('-n', '--no-robot', action='store_true', help="don't connect to the xArm")
 parser.add_argument('-r', '--reset-pos', action='store_true', help="reset the current position to default for writing mode")
+#TODO: this ^
 args = parser.parse_args()
 # print(args.no_robot)
 
