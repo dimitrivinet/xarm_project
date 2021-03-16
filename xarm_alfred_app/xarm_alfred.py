@@ -30,6 +30,8 @@ parser.add_argument('-r', '--reset-pos', action='store_true', help="reset the cu
 args = parser.parse_args()
 # print(args.no_robot)
 
+NO_ROBOT = args.no_robot
+
 
 arm = "dummy"
 
@@ -128,11 +130,14 @@ def handle_stream(data):
 
     rasa_response = send_rasa(stt)
     # print(rasa_response)
-    emit('rasa_response', rasa_response)
+    emit('rasa_response', rasa_response[5:])
 
-    to_write = extract_to_write(rasa_response)
-    if arm != "dummy" and to_write != -1:
-        arm.write(to_write)
+    if not NO_ROBOT:
+        robot_control.rasa_command_queue.put(rasa_response)
+
+    # to_write = extract_to_write(rasa_response)
+    # if arm != "dummy" and to_write != -1:
+    #     arm.write(to_write)
 
 @socketio.on('manual_stream')
 def handle_manual_stream(data):
@@ -140,11 +145,14 @@ def handle_manual_stream(data):
 
     rasa_response = send_rasa(data)
 
-    emit('rasa_response', rasa_response)
+    emit('rasa_response', rasa_response[5:])
 
-    to_write = extract_to_write(rasa_response)
-    if arm != "dummy" and to_write != -1:
-        arm.write(to_write)
+    if not NO_ROBOT:
+        robot_control.rasa_command_queue.put(rasa_response)
+
+    # to_write = extract_to_write(rasa_response)
+    # if arm != "dummy" and to_write != -1:
+    #     arm.write(to_write)
 
 @app.route('/')
 def page():
@@ -155,7 +163,8 @@ if __name__ == '__main__':
 
     print('server launched.\n')
 
-    if not args.no_robot:
+    if not NO_ROBOT:
         arm = robot_control.Arm()
+        arm.start()
 
     socketio.run(app, host=HTTP_SERVER_HOST, port = HTTP_SERVER_PORT,)
