@@ -70,7 +70,7 @@ def extract_to_write(message: str) -> str:
         
 
 def send_rasa(message: str) -> str:
-    r = requests.post("http://localhost:5005/webhooks/rest/webhook", json={"sender": "alfred_user", "message": message})
+    r = requests.post("http://rasa:5005/webhooks/rest/webhook", json={"sender": "alfred_user", "message": message})
     return r.json()[0]["text"]
 
 def genHeader():

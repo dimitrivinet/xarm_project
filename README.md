@@ -12,3 +12,10 @@ Demo for web speech recognition. Requirements: Flask and icecream (install via p
 ## arm_jarvis_app
 
 Web app for speech recognition, to be merged with arm control.
+
+#### Launch on docker:
+
+
+docker run -it -p 5005:5005 --name rasa dimitrivinet/rasa-api
+
+docker run -it --name alfred -p 8080:8080 --link rasa dimitrivinet/alfred

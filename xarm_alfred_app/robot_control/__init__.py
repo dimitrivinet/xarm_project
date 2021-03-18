@@ -36,15 +36,17 @@ def sigint_handler(sig, frame):
                 writing.write_exit(_arm.arm)
 
             _arm.arm.disconnect()
+
         sys.exit(0)
 
 signal.signal(signal.SIGINT, sigint_handler)
 
 class Arm(threading.Thread):
-    def __init__(self):
-        super().__init__(self)
+    def __init__(self, reset_pos=False, daemon=True):
+        threading.Thread.__init__(self, daemon=daemon)
         self.current_mode = "none"
         self.arm = robot_start()
+        self.reset_pos=reset_pos
         global _arm
         _arm = self
 
@@ -60,7 +62,7 @@ class Arm(threading.Thread):
             if code == "#101":
                 continue
             elif code == "#201":
-                self.write(command[25:-1])
+                self.write(command[30:-1])
             elif code == "#202":
                 self.grab(command[37:])
 
@@ -71,7 +73,7 @@ class Arm(threading.Thread):
         to_write = sentence_normalize(to_write)
         print(f"to write: {to_write}")
         if self.current_mode != "writing":
-            writing.write_setup(self.arm)
+            writing.write_setup(self.arm, self.reset_pos)
         self.current_mode = "writing"
         writing.robot_write(self.arm, to_write)
     
