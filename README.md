@@ -16,6 +16,6 @@ Web app for speech recognition, to be merged with arm control.
 #### Launch on docker:
 
 
-docker run -it -p 5005:5005 --name rasa dimitrivinet/rasa-api
+docker run -dit -p 5005:5005 --name rasa dimitrivinet/rasa-api
 
 docker run -it --name alfred -p 8080:8080 --link rasa dimitrivinet/alfred
