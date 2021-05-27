@@ -1,0 +1,14 @@
+version: "3.5"
+services:
+  arm_control:
+    container_name: arm_control
+    image: dimitrivinet/alfred:novosk
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    command: "/bin/bash"
+    ports:
+      - "8000:8000"
+  rasa:
+    image: dimitrivinet/rasa-api:latest
+    ports:
+      - "5005:5005"
