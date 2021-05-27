@@ -13,21 +13,29 @@ sys.path.append(dirname)
 
 import wave
 import requests
-import robot_control
 import argparse
 import threading
 
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 
-
-from voice_recog_vosk.voice_recog import recog 
+# from voice_recog_vosk.voice_recog import recog 
+import azure.cognitiveservices.speech as speechsdk
+speech_config = speechsdk.SpeechConfig(subscription="b6aeeece6e0c404d8390528985e1a213", region="francecentral")
+speech_config.speech_recognition_language="fr-FR"
 
 parser = argparse.ArgumentParser(description='A.L.F.R.E.D., robotic assistant.')
 parser.add_argument('-n', '--no-robot', action='store_true', help="don't connect to the xArm")
 parser.add_argument('-r', '--reset-pos', action='store_true', help="reset the current position to default for writing mode")
+#TODO: this ^
 args = parser.parse_args()
 # print(args.no_robot)
+
+NO_ROBOT = args.no_robot
+RESET_POS = args.reset_pos
+
+if not NO_ROBOT:
+    import robot_control
 
 
 arm = "dummy"
@@ -42,25 +50,11 @@ socketio = SocketIO(app, logger=False, engineio_logger=False, allow_upgrades=Fal
 socketio.init_app(app, cors_allowed_origins="*")
 
 HTTP_SERVER_PORT = 8080
-HTTP_SERVER_HOST = "localhost"
+HTTP_SERVER_HOST = "0.0.0.0"
 
 sampleRate = 44100
 bitsPerSample = 16
 channels = 1
-
-
-def extract_to_write(message: str) -> str:
-    try:
-        if message[0:7] == "Entendu":
-            to_write = message[25:-1]
-            print(f"to write: {to_write}")
-            return to_write
-        else:
-            print("pas de mot à écrire dans le message")
-            return -1
-    except:
-        print("pas de mot à écrire dans le message")
-        return -1
         
 
 def send_rasa(message: str) -> str:
@@ -117,33 +111,52 @@ def handle_stream(data):
     
     print(f"file written")
     print(f"recognizing...")
-    stt = recog(f"file_0.wav")
-    print(f"recognized: {stt}")
 
-    emit('audio_stream_response', stt)
+    audio_input = speechsdk.AudioConfig(filename=f"{dirname}/wavs/file_0.wav")
+    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_input)
+    
+    result = speech_recognizer.recognize_once_async().get()
+
+    if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+        print("Recognized: {}".format(result.text))
+        emit('audio_stream_response', result.text)
+    elif result.reason == speechsdk.ResultReason.NoMatch:
+        print("No speech could be recognized: {}".format(result.no_match_details))
+    elif result.reason == speechsdk.ResultReason.Canceled:
+        cancellation_details = result.cancellation_details
+        print("Speech Recognition canceled: {}".format(cancellation_details.reason))
+        if cancellation_details.reason == speechsdk.CancellationReason.Error:
+            print("Error details: {}".format(cancellation_details.error_details))
 
     print("_" * 16)
     print("")
 
     rasa_response = send_rasa(stt)
     # print(rasa_response)
-    emit('rasa_response', rasa_response)
+    emit('rasa_response', rasa_response[5:])
 
-    to_write = extract_to_write(rasa_response)
-    if arm != "dummy" and to_write != -1:
-        arm.write(to_write)
+    if not NO_ROBOT:
+        robot_control.rasa_command_queue.put(rasa_response)
+
+    # to_write = extract_to_write(rasa_response)
+    # if arm != "dummy" and to_write != -1:
+    #     arm.write(to_write)
 
 @socketio.on('manual_stream')
 def handle_manual_stream(data):
-    print(data)
+    print(f"user: {data}")
 
     rasa_response = send_rasa(data)
+    print(f"rasa: {rasa_response}")
 
-    emit('rasa_response', rasa_response)
+    emit('rasa_response', rasa_response[5:])
 
-    to_write = extract_to_write(rasa_response)
-    if arm != "dummy" and to_write != -1:
-        arm.write(to_write)
+    if not NO_ROBOT:
+        robot_control.rasa_command_queue.put(rasa_response)
+
+    # to_write = extract_to_write(rasa_response)
+    # if arm != "dummy" and to_write != -1:
+    #     arm.write(to_write)
 
 @app.route('/')
 def page():
@@ -154,7 +167,8 @@ if __name__ == '__main__':
 
     print('server launched.\n')
 
-    if not args.no_robot:
-        arm = robot_control.Arm()
+    if not NO_ROBOT:
+        arm = robot_control.Arm(reset_pos=RESET_POS, daemon=True, )
+        arm.start()
 
     socketio.run(app, host=HTTP_SERVER_HOST, port = HTTP_SERVER_PORT,)

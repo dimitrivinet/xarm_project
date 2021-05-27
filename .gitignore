@@ -3,6 +3,8 @@
 project2021.code-workspace
 xarm_alfred_app/voice_recog_vosk/model/
 xarm_alfred_app/wavs/
+objects/
+pyrealsense_test.py
 
 
 # Byte-compiled / optimized / DLL files
@@ -134,3 +136,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+test.py

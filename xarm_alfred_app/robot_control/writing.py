@@ -55,31 +55,36 @@ def send_sentence(arm: XArmAPI, sentence: str, ) -> int:
     return robot_write(arm, to_write)
 
 
-def get_last_pos(default_pos: list(), ) -> list(): 
+def get_last_pos(default_pos: list(), reset_pos: bool=False) -> list(): 
     current_pos = [0, 0]
-
-    try:
-        print("opening current_pos file...")
-
-        with open(dirname + "/current_pos.tmp", "r") as f:
-            y = lambda x: float(x.rstrip("\n"))
-            current_pos = list(map(y, f.readlines()[:2]))
-
-    except FileNotFoundError:
-        print("current_pos file does not exist. creating file.")
+    
+    if reset_pos:
+        current_pos = default_pos.copy()
         with open(dirname + "/current_pos.tmp", "w") as f:
             f.write(f"{default_pos[0]}\n{default_pos[1]}")
-        current_pos = default_pos.copy()
+    else:
+        try:
+            print("opening current_pos file...")
 
-    except ValueError:
-        print("invalid value in current_pos file. resetting current letter index.")
-        with open(dirname + "/current_pos.tmp", "w+") as f:
-            f.write(f"{default_pos[0]}\n{default_pos[1]}")
-        current_pos = default_pos.copy()
+            with open(dirname + "/current_pos.tmp", "r") as f:
+                y = lambda x: float(x.rstrip("\n"))
+                current_pos = list(map(y, f.readlines()[:2]))
 
-    except:
-        print("Unexpected error:", sys.exc_info()[0])
-        pass
+        except FileNotFoundError:
+            print("current_pos file does not exist. creating file.")
+            with open(dirname + "/current_pos.tmp", "w") as f:
+                f.write(f"{default_pos[0]}\n{default_pos[1]}")
+            current_pos = default_pos.copy()
+
+        except ValueError:
+            print("invalid value in current_pos file. resetting current letter index.")
+            with open(dirname + "/current_pos.tmp", "w+") as f:
+                f.write(f"{default_pos[0]}\n{default_pos[1]}")
+            current_pos = default_pos.copy()
+
+        except:
+            print("Unexpected error:", sys.exc_info()[0])
+            pass
 
 
     print(f"last position: {current_pos}\n")
@@ -110,7 +115,8 @@ def goto_last_pos(arm: XArmAPI, last_pos: list, ):
         print('set_position, ret={}'.format(ret))
         return -1
 
-    ret = arm.set_position(last_pos[0], last_pos[1], 171.8, current_pos[3], current_pos[4], 90, 
+    # ret = arm.set_position(last_pos[0], last_pos[1], 171.8, current_pos[3], current_pos[4], 90, 
+    ret = arm.set_position(last_pos[0], last_pos[1], 172.8, current_pos[3], current_pos[4], 90, 
         radius=-1, is_radian=False, wait=True, speed=20, mvacc=200, relative=False)
     if ret < 0:
         print('set_position, ret={}'.format(ret))
@@ -119,7 +125,7 @@ def goto_last_pos(arm: XArmAPI, last_pos: list, ):
     return 0
 
 
-def write_setup(arm: XArmAPI, ) -> int:
+def write_setup(arm: XArmAPI, reset_pos: bool=False) -> int:
     arm.set_world_offset([0, 0, 0, 0, 0, 0])
     time.sleep(1)
 
@@ -127,7 +133,7 @@ def write_setup(arm: XArmAPI, ) -> int:
     arm.set_mode(0)
     arm.set_state(state=0)
 
-    goto_last_pos(arm, get_last_pos(default_pos))
+    goto_last_pos(arm, get_last_pos(default_pos, reset_pos))
 
     print("arm at starting pos")
     print(arm.position)
