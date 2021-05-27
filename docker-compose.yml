@@ -9,7 +9,9 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - ARM_IP="10.1.30.250"
+      - ARM_IP=10.1.30.250
+    links:
+      - rasa
   rasa:
     image: dimitrivinet/rasa-api:latest
     ports:

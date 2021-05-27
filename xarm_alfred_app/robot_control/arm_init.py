@@ -8,7 +8,7 @@ import signal
 from xarm.wrapper import XArmAPI
 
 ARM_IP = os.getenv("ARM_IP", default="172.21.72.250")
-
+print(f"{ARM_IP=}")
 
 def robot_start() -> XArmAPI:
     arm = "dummy"
