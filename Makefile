@@ -8,8 +8,8 @@ run:
 	docker-compose run --rm arm_control
 
 build:
-	sudo docker build -t dimitrivinet/alfred:latest .
+	docker build -t dimitrivinet/alfred:latest .
 
 stop:
-	-sudo docker stop rasa && sudo docker rm rasa
-	-sudo docker stop alfred && sudo docker rm alfred
+	-docker stop rasa && sudo docker rm rasa
+	-docker stop alfred && sudo docker rm alfred
