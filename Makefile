@@ -1,3 +1,5 @@
+IMAGE_NAME=dimitrivinet/alfred
+IMAGE_TAG=latest
 
 
 run:
@@ -7,9 +9,16 @@ run:
 #	sudo docker run -it --name alfred -p 8080:8080 --link rasa dimitrivinet/alfred:novosk
 	docker-compose run --rm arm_control
 
-build:
-	docker build -t dimitrivinet/alfred:latest .
+down:
+#	-docker stop rasa && sudo docker rm rasa
+#	-docker stop alfred && sudo docker rm alfred
+	docker-compose down
 
-stop:
-	-docker stop rasa && sudo docker rm rasa
-	-docker stop alfred && sudo docker rm alfred
+build:
+	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
+
+dev:
+	docker build -t $(IMAGE_NAME):dev .
+
+push:
+	docker push $(IMAGE_NAME):$(IMAGE_TAG) 

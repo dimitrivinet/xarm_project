@@ -1,18 +1,23 @@
 version: "3.5"
+
 services:
   arm_control:
     image: dimitrivinet/alfred:latest
-    stdin_open: true # docker run -i
-    tty: true        # docker run -t
-    command: "/bin/bash"
     ports:
       - "8080:8080"
+    # stdin_open: true      # docker run -i
+    # tty: true             # docker run -t
+    # command: /bin/bash
     environment:
-      - ARM_IP=10.1.30.250
+      - ARM_IP=10.1.64.250
+      - NO_ROBOT=1          # 0 if you want robot connection else 0
+      - PYTHONUNBUFFERED=1  # to show python print output
     depends_on: 
       - rasa
     networks:
       - alfred
+    volumes:
+      - ./xarm_alfred_app/xarm_alfred.py:/app/xarm_alfred.py
   rasa:
     image: dimitrivinet/rasa-api:latest
     ports:

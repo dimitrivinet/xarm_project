@@ -31,8 +31,10 @@ parser.add_argument('-r', '--reset-pos', action='store_true', help="reset the cu
 args = parser.parse_args()
 # print(args.no_robot)
 
-NO_ROBOT = args.no_robot
+# NO_ROBOT = args.no_robot
 RESET_POS = args.reset_pos
+
+NO_ROBOT = os.getenv("NO_ROBOT", default=0)
 
 if not NO_ROBOT:
     import robot_control
@@ -160,15 +162,15 @@ def handle_manual_stream(data):
 
 @app.route('/')
 def page():
-    return render_template('index.html', )
+    return render_template('index.html')
 
 
 if __name__ == '__main__':
 
-    print('server launched.\n')
-
     if not NO_ROBOT:
         arm = robot_control.Arm(reset_pos=RESET_POS, daemon=True, )
         arm.start()
+
+    print(f"\nstarting sever on {HTTP_SERVER_HOST}:{HTTP_SERVER_PORT}\n")
 
     socketio.run(app, host=HTTP_SERVER_HOST, port = HTTP_SERVER_PORT,)

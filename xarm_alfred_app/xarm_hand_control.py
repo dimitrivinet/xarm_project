@@ -1,15 +1,19 @@
-from cv2 import cv2
+
+
+
+
+import sys
+import signal
+import math
+import time 
 import mediapipe as mp
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
-import sys
-import signal
-from collections import deque
-import statistics
+
+from cv2 import cv2
+from collections import deque, Counter
 from statistics import mode #, multimode
-import math
-from collections import Counter
-import time 
+
 import robot_control
 
 

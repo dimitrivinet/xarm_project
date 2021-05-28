@@ -11,4 +11,4 @@ RUN pip3 install git+https://github.com/xArm-Developer/xArm-Python-SDK.git
 
 COPY ./xarm_alfred_app app/
 
-CMD bash
+CMD cd /app && python3 xarm_alfred.py
