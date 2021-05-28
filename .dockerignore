@@ -1,1 +1,3 @@
-xarm_alfred_app/voice_recog_vosk/
+**/__pycache__/
+**/.env
+.git/

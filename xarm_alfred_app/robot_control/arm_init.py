@@ -6,6 +6,9 @@ import time
 import signal
 
 from xarm.wrapper import XArmAPI
+from dotenv import load_dotenv
+
+load_dotenv()
 
 ARM_IP = os.getenv("ARM_IP", default="10.1.64.250")
 print(f"{ARM_IP=}")

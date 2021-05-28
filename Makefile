@@ -1,5 +1,4 @@
 IMAGE_NAME=dimitrivinet/alfred
-IMAGE_TAG=latest
 
 
 run:
@@ -15,10 +14,13 @@ down:
 	docker-compose down
 
 build:
-	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
-
-dev:
 	docker build -t $(IMAGE_NAME):dev .
 
 push:
-	docker push $(IMAGE_NAME):$(IMAGE_TAG) 
+	docker push $(IMAGE_NAME):dev
+
+build_prod:
+	docker build -t $(IMAGE_NAME):latest .
+
+push_prod:
+	docker build -t $(IMAGE_NAME):latest .
