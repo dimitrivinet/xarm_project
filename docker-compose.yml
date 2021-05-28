@@ -1,18 +1,24 @@
 version: "3.5"
 services:
   arm_control:
-    container_name: arm_control
     image: dimitrivinet/alfred:latest
     stdin_open: true # docker run -i
     tty: true        # docker run -t
     command: "/bin/bash"
     ports:
-      - "8000:8000"
+      - "8080:8080"
     environment:
       - ARM_IP=10.1.30.250
-    links:
+    depends_on: 
       - rasa
+    networks:
+      - alfred
   rasa:
     image: dimitrivinet/rasa-api:latest
     ports:
       - "5005:5005"
+    networks:
+      - alfred
+
+networks:
+  alfred:
