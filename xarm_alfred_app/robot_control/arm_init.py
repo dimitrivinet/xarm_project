@@ -6,7 +6,12 @@ import time
 import signal
 
 from xarm.wrapper import XArmAPI
+from dotenv import load_dotenv
 
+load_dotenv()
+
+ARM_IP = os.getenv("ARM_IP", default="10.1.64.250")
+print(f"{ARM_IP=}")
 
 def robot_start() -> XArmAPI:
     arm = "dummy"
@@ -14,7 +19,7 @@ def robot_start() -> XArmAPI:
     connected = False
     while not connected:
         try:
-            arm = XArmAPI('172.21.72.250', do_not_open=True)
+            arm = XArmAPI(ARM_IP, do_not_open=True)
             arm.connect()
             connected = True
         except:
