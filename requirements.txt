@@ -1,4 +1,7 @@
+absl-py==0.12.0
+attrs==21.2.0
 autopep8==1.5.5
+azure-cognitiveservices-speech==1.16.0
 bidict==0.21.2
 certifi==2020.12.5
 cffi==1.14.5
@@ -14,11 +17,15 @@ idna==2.10
 itsdangerous==1.1.0
 Jinja2==2.11.3
 MarkupSafe==1.1.1
+mediapipe==0.8.4.2
 numpy==1.20.1
+opencv-contrib-python==4.5.2.52
+protobuf==3.17.1
 pycodestyle==2.7.0
 pycparser==2.20
 pyrealsense2==2.42.0.2924
 pyserial==3.4
+python-dotenv==0.17.1
 python-engineio==4.0.0
 python-socketio==5.0.4
 requests==2.25.1
@@ -26,6 +33,6 @@ six==1.15.0
 toml==0.10.2
 urllib3==1.26.3
 Werkzeug==1.0.1
+xArm-Python-SDK @ git+https://github.com/xArm-Developer/xArm-Python-SDK.git@e8475781cb7365a3d4134fdda0ee359b6142ca8e
 zope.event==4.5.0
 zope.interface==5.2.0
-azure-cognitiveservices-speech==1.16.0
