@@ -10,7 +10,7 @@ services:
     # command: /bin/bash
     environment:
       - ARM_IP=10.1.64.250
-      - NO_ROBOT=1          # 0 if you want robot connection else 0
+      - NO_ROBOT=1          # 0 if you want robot connection else 1
       - PYTHONUNBUFFERED=1  # to show python print output
     depends_on: 
       - rasa
