@@ -1,6 +1,18 @@
 IMAGE_NAME=dimitrivinet/alfred
 
 
+run_alfred:
+	cd xarm_project/ &&	docker-compose up -d
+	cd ..
+	sleep 5
+	brave-browser -new-tab 'http://localhost:8080'
+
+down_alfred:
+	cd xarm_project/ && docker-compose down
+
+run_hand:
+	alfred_venv/bin/python3 xarm_project/xarm_alfred_app/xarm_hand_control.py
+
 run:
 #	-sudo docker stop rasa && sudo docker rm rasa
 #	-sudo docker stop alfred && sudo docker rm alfred
